@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Admin - จัดการข้อมูล</title>
+<script src="data.js"></script>
+<style>
+body { font-family: sans-serif; padding: 20px; }
+input, button { padding: 10px; margin: 5px; }
+</style>
+</head>
+<body>
+<h1>จัดการข้อมูลรหัสปัญหา</h1>
+
+<h3>เพิ่มข้อมูล</h3>
+<input type="text" id="brand" placeholder="ยี่ห้อ">
+<input type="text" id="model" placeholder="รุ่น">
+<input type="text" id="variant" placeholder="Variant">
+<input type="text" id="code" placeholder="รหัส">
+<input type="text" id="desc" placeholder="คำอธิบาย">
+<button onclick="addData()">เพิ่ม</button>
+
+<h3>ข้อมูลทั้งหมด</h3>
+<div id="list"></div>
+
+<script>
+function renderList(){
+  document.getElementById("list").innerHTML = data.map((v,i) =>
+    `<p><b>${v.brand} ${v.model} ${v.variant}</b>
+    <button onclick="deleteData(${i})">ลบ</button></p>`).join("");
+}
+
+function addData(){
+  const brand=document.getElementById("brand").value.trim();
+  const model=document.getElementById("model").value.trim();
+  const variant=document.getElementById("variant").value.trim();
+  const code=document.getElementById("code").value.trim();
+  const desc=document.getElementById("desc").value.trim();
+  if(brand&&model&&variant&&code&&desc){
+      const vehicle = data.find(d=>d.brand===brand && d.model===model && d.variant===variant);
+      if(vehicle){
+          vehicle.codes.push({code,description:desc,possible_causes:[],diagnosis_steps:[],repair_steps:[],reference:"",image:""});
+      }else{
+          data.push({brand,model,variant,codes:[{code,description:desc,possible_causes:[],diagnosis_steps:[],repair_steps:[],reference:"",image:""}]});
+      }
+      saveData();
+  }
+}
+
+function deleteData(index){
+  if(confirm("ต้องการลบข้อมูลใช่หรือไม่?")){
+    data.splice(index,1);
+    saveData();
+  }
+}
+
+function saveData(){
+  const blob = new Blob([`const data = ${JSON.stringify(data,null,2)};`],{type:"application/javascript"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href=url; a.download="data.js"; a.click();
+  URL.revokeObjectURL(url);
+  renderList();
+}
+
+renderList();
+</script>
+</body>
+</html>
